@@ -1,91 +1,147 @@
 
-const OWNER = "0x9f1053b119d1565e641d0694c3cf6c6bfe644da7".toLowerCase();
-const CONTRACT = "0x2Edf764970BFa32Bfd6e0799682026814BcDF24B";
-const USDT_ADDR = "0xc2132D05D31c914a87C6611C10748AEb04B58e8F";
-const POLYGON_ID = '0x89';
-let wallet, provider;
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OCEAN INFINITY</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #020617; color: white; text-align: center; margin: 0; padding: 20px; }
+        .lang-switch { position: absolute; top: 20px; right: 20px; }
+        .lang-btn { background: #1e3a8a; color: white; border: 1px solid #3b82f6; padding: 5px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; }
+        .card { background: #0f172a; border-radius: 25px; padding: 35px 30px; max-width: 380px; margin: 40px auto; border: 1px solid #1e3a8a; box-shadow: 0 0 50px rgba(0,0,0,0.8); position: relative; }
+        h1 { color: #3b82f6; text-transform: uppercase; letter-spacing: 4px; font-size: 22px; margin-bottom: 20px; text-shadow: 0 0 15px rgba(59,130,246,0.5); }
+        .total-box { border: 1px dashed #3b82f6; border-radius: 15px; padding: 10px; margin-bottom: 20px; font-weight: bold; font-size: 13px; text-transform: uppercase; }
+        .promo-box { background: linear-gradient(135deg, #1e3a8a 0%, #020617 100%); padding: 25px; border-radius: 20px; margin: 25px 0; border: 1px solid #3b82f6; }
+        .promo-text { font-weight: 900; font-size: 13px; text-transform: uppercase; line-height: 1.5; color: #fff; }
+        .stat-item { background: #020617; padding: 16px; border-radius: 12px; border: 1px solid #1e293b; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .stat-label { color: #94a3b8; font-weight: bold; font-size: 14px; }
+        .stat-value { color: #3b82f6; font-weight: 900; }
+        .btn-main { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; border: none; padding: 18px; border-radius: 15px; cursor: pointer; width: 100%; font-weight: 900; font-size: 16px; transition: 0.2s; box-shadow: 0 8px 16px rgba(59,130,246,0.3); }
+        .btn-orange { background: linear-gradient(135deg, #f59e0b, #d97706); box-shadow: 0 8px 16px rgba(245,158,11,0.3); }
+        input { width: 100%; padding: 14px; margin: 15px 0; border-radius: 12px; border: 1px solid #1e293b; background: #020617; color: #60a5fa; text-align: center; font-weight: bold; box-sizing: border-box; font-size: 11px; }
+        #cabinet { display: none; }
+        .footer-text { color: #f59e0b; font-size: 11px; margin-top: 15px; text-transform: uppercase; font-weight: 900; }
+    </style>
+</head>
+<body>
 
-const MY_ABI = [
-    "function users(address) view returns (bool isExist, uint256 id, uint8 level)",
-    "function lastUserId() view returns (uint256)",
-    "function registration(address referrer) public" 
-];
+    <div class="card">
+        <div class="lang-switch">
+            <button class="lang-btn" onclick="setLang('ru')">RU</button>
+            <button class="lang-btn" onclick="setLang('en')">EN</button>
+        </div>
 
-async function connect() {
-    if (window.ethereum) {
-        try {
-            // Исправленное переключение сети
-            try {
-                await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: POLYGON_ID }] });
-            } catch (switchError) {
-                if (switchError.code === 4902) alert("Добавьте сеть Polygon в кошелек!");
-            }
-
-            provider = new ethers.providers.Web3Provider(window.ethereum);
-            const accs = await window.ethereum.request({ method: 'eth_requestAccounts' });
-            
-            // ИСПРАВЛЕНИЕ: Берем первый адрес из массива
-            wallet = accs[0].toLowerCase(); 
-            
-            showApp();
-        } catch (e) { 
-            console.error(e);
-            alert("Ошибка подключения!"); 
-        }
-    } else {
-        window.location.href = "https://app.link" + window.location.href.replace(/^https?:\/\//, '');
-    }
-}
-
-async function showApp() {
-    document.getElementById('connectBtn').style.display = 'none';
-    document.getElementById('cabinet').style.display = 'block';
-    // ИСПРАВЛЕНИЕ: Гарантируем правильную ссылку
-    const currentPath = window.location.origin + window.location.pathname;
-    document.getElementById('refLink').value = currentPath + "?ref=" + wallet;
-
-    const con = new ethers.Contract(CONTRACT, MY_ABI, provider);
-    try {
-        const u = await con.users(wallet);
-        document.getElementById('ui-id').innerText = u.isExist ? u.id.toString() : "OFFLINE";
-        document.getElementById('ui-lvl').innerText = u.level || 0;
-        document.getElementById('actionBtn').innerText = u.isExist ? "ПОВЫСИТЬ УРОВЕНЬ" : "ВСТУПИТЬ В СЕМЬЮ (10 USDT)";
-        const total = await con.lastUserId();
-        document.getElementById('totalUsers').innerText = total.toString();
-    } catch(e) { console.error("Ошибка загрузки данных контракта", e); }
-}
-
-async function handleAction() {
-    try {
-        const signer = provider.getSigner();
-        const usdt = new ethers.Contract(USDT_ADDR, ["function approve(address,uint256) public returns(bool)"], signer);
-        const amount = ethers.utils.parseUnits("10.0", 6);
-
-        document.getElementById('footerStatus').innerText = "1/2 ПОДТВЕРДИТЕ USDT...";
-        const appTx = await usdt.approve(CONTRACT, amount);
-        await appTx.wait();
-
-        document.getElementById('footerStatus').innerText = "2/2 РЕГИСТРАЦИЯ...";
-        const myCon = new ethers.Contract(CONTRACT, MY_ABI, signer);
+        <h1>OCEAN INFINITY 🌊</h1>
+        <div class="total-box"><span id="t-family">В СЕМЬЕ УЖЕ</span>: <span id="totalUsers" style="color:white;">...</span></div>
         
-        const urlParams = new URLSearchParams(window.location.search);
-        const ref = urlParams.get('ref') || OWNER;
+        <div class="promo-box">
+            <div id="promo-text" class="promo-text">«ЗДЕСЬ ПЕЧАТАЮТ ДЕНЬГИ. ЗДЕСЬ СТРОЯТ ИМПЕРИИ. ТВОЯ СЕМЬЯ — ТВОЯ КРЕПОСТЬ!»</div>
+        </div>
 
-        const tx = await myCon.registration(ref); 
-        await tx.wait();
+        <button id="connectBtn" class="btn-main" onclick="connect()">ВОЙТИ В СИСТЕМУ</button>
 
-        alert("УСПЕХ!");
-        location.reload();
-    } catch (e) {
-        console.error(e);
-        alert("Ошибка транзакции! Убедитесь, что у вас есть MATIC для газа и 10 USDT.");
-        document.getElementById('footerStatus').innerText = "";
-    }
-}
+        <div id="cabinet">
+            <div class="stat-item"><span class="stat-label">ID:</span> <span id="ui-id" class="stat-value">...</span></div>
+            <div class="stat-item"><span id="t-level" class="stat-label">УРОВЕНЬ:</span> <span id="ui-lvl" class="stat-value">...</span></div>
+            <input type="text" id="refLink" readonly>
+            <button id="t-copy" class="btn-main" style="background: #334155; font-size: 12px; margin-bottom: 10px; box-shadow:none;" onclick="copyLink()">КОПИРОВАТЬ ССЫЛКУ</button>
+            <button id="actionBtn" class="btn-main" onclick="handleAction()">...</button>
+            <div id="footerStatus" class="footer-text"></div>
+        </div>
+    </div>
 
-function copyLink() {
-    const i = document.getElementById("refLink");
-    i.select();
-    navigator.clipboard.writeText(i.value);
-    alert("Ссылка скопирована!");
-}
+    <script>
+        const OWNER = "0x9f1053b119d1565e641d0694c3cf6c6bf e644da7".toLowerCase().replace(/\s/g, '');
+        const CONTRACT = "0x2Edf764970BFa32Bfd6e0799682026814BcDF24B";
+        let wallet, provider;
+        let currentLang = 'ru';
+
+        const i18n = {
+            ru: {
+                family: "В СЕМЬЕ УЖЕ",
+                promo: "«ЗДЕСЬ ПЕЧАТАЮТ ДЕНЬГИ. ЗДЕСЬ СТРОЯТ ИМПЕРИИ. ТВОЯ СЕМЬЯ — ТВОЯ КРЕПОСТЬ!»",
+                login: "ВОЙТИ В СИСТЕМУ",
+                level: "УРОВЕНЬ",
+                copy: "КОПИРОВАТЬ ССЫЛКУ",
+                join: "ВСТУПИТЬ В СЕМЬЮ ($10)",
+                upgrade: "ПОВЫСИТЬ УРОВЕНЬ",
+                admin: "УПРАВЛЕНИЕ FOUNDER №1",
+                founder_mode: "РЕЖИМ ОСНОВАТЕЛЯ АКТИВИРОВАН"
+            },
+            en: {
+                family: "FAMILY SIZE",
+                promo: "«HERE WE PRINT MONEY. HERE WE BUILD EMPIRES. YOUR FAMILY IS YOUR FORTRESS!»",
+                login: "LOGIN TO SYSTEM",
+                level: "LEVEL",
+                copy: "COPY REFERRAL LINK",
+                join: "JOIN THE FAMILY ($10)",
+                upgrade: "UPGRADE LEVEL",
+                admin: "FOUNDER №1 CONTROL",
+                founder_mode: "FOUNDER MODE ACTIVATED"
+            }
+        };
+
+        function setLang(lang) {
+            currentLang = lang;
+            document.getElementById('t-family').innerText = i18n[lang].family;
+            document.getElementById('promo-text').innerText = i18n[lang].promo;
+            document.getElementById('connectBtn').innerText = i18n[lang].login;
+            document.getElementById('t-level').innerText = i18n[lang].level;
+            document.getElementById('t-copy').innerText = i18n[lang].copy;
+            if (wallet) showApp(); 
+        }
+
+        async function connect() {
+            if (window.ethereum) {
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                const accs = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                wallet = accs[0].toLowerCase();
+                showApp();
+            } else if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+                window.location.href = "https://metamask.app.link/dapp/" + window.location.href.replace(/^https?:\/\//, '');
+            } else { alert("Please install MetaMask!"); }
+        }
+
+        async function showApp() {
+            document.getElementById('connectBtn').style.display = 'none';
+            document.getElementById('cabinet').style.display = 'block';
+            document.getElementById('refLink').value = window.location.origin + window.location.pathname + "?ref=" + wallet;
+
+            const con = new ethers.Contract(CONTRACT, ["function users(address) view returns (bool isExist, uint256 id, uint8 level)", "function lastUserId() view returns (uint256)"], provider);
+
+            if (wallet === OWNER) {
+                document.getElementById('ui-id').innerText = "1 (FOUNDER)";
+                document.getElementById('ui-lvl').innerText = "15 (MAX)";
+                document.getElementById('actionBtn').innerText = i18n[currentLang].admin;
+                document.getElementById('actionBtn').classList.add('btn-orange');
+                document.getElementById('footerStatus').innerText = i18n[currentLang].founder_mode;
+            } else {
+                try {
+                    const u = await con.users(wallet);
+                    document.getElementById('ui-id').innerText = u.isExist ? u.id : "OFFLINE";
+                    document.getElementById('ui-lvl').innerText = u.level || 0;
+                    document.getElementById('actionBtn').innerText = u.isExist ? i18n[currentLang].upgrade : i18n[currentLang].join;
+                } catch(e) {}
+            }
+            try {
+                const total = await con.lastUserId();
+                document.getElementById('totalUsers').innerText = total.toString();
+            } catch(e) {}
+        }
+
+        function copyLink() {
+            const i = document.getElementById("refLink"); i.select(); document.execCommand("copy");
+            const btn = document.getElementById('t-copy');
+            const oldText = btn.innerText;
+            btn.innerText = "COPIED! / СКОПИРОВАНО!";
+            setTimeout(() => btn.innerText = oldText, 2000);
+        }
+
+        function handleAction() {
+            if (wallet === OWNER) alert("Spartan, system is ready!");
+        }
+    </script>
+</body>
+</html>
