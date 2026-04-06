@@ -1,0 +1,91 @@
+
+const OWNER = "0x9f1053b119d1565e641d0694c3cf6c6bfe644da7".toLowerCase();
+const CONTRACT = "0x2Edf764970BFa32Bfd6e0799682026814BcDF24B";
+const USDT_ADDR = "0xc2132D05D31c914a87C6611C10748AEb04B58e8F";
+const POLYGON_ID = '0x89';
+let wallet, provider;
+
+const MY_ABI = [
+    "function users(address) view returns (bool isExist, uint256 id, uint8 level)",
+    "function lastUserId() view returns (uint256)",
+    "function registration(address referrer) public" 
+];
+
+async function connect() {
+    if (window.ethereum) {
+        try {
+            // Исправленное переключение сети
+            try {
+                await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: POLYGON_ID }] });
+            } catch (switchError) {
+                if (switchError.code === 4902) alert("Добавьте сеть Polygon в кошелек!");
+            }
+
+            provider = new ethers.providers.Web3Provider(window.ethereum);
+            const accs = await window.ethereum.request({ method: 'eth_requestAccounts' });
+            
+            // ИСПРАВЛЕНИЕ: Берем первый адрес из массива
+            wallet = accs[0].toLowerCase(); 
+            
+            showApp();
+        } catch (e) { 
+            console.error(e);
+            alert("Ошибка подключения!"); 
+        }
+    } else {
+        window.location.href = "https://app.link" + window.location.href.replace(/^https?:\/\//, '');
+    }
+}
+
+async function showApp() {
+    document.getElementById('connectBtn').style.display = 'none';
+    document.getElementById('cabinet').style.display = 'block';
+    // ИСПРАВЛЕНИЕ: Гарантируем правильную ссылку
+    const currentPath = window.location.origin + window.location.pathname;
+    document.getElementById('refLink').value = currentPath + "?ref=" + wallet;
+
+    const con = new ethers.Contract(CONTRACT, MY_ABI, provider);
+    try {
+        const u = await con.users(wallet);
+        document.getElementById('ui-id').innerText = u.isExist ? u.id.toString() : "OFFLINE";
+        document.getElementById('ui-lvl').innerText = u.level || 0;
+        document.getElementById('actionBtn').innerText = u.isExist ? "ПОВЫСИТЬ УРОВЕНЬ" : "ВСТУПИТЬ В СЕМЬЮ (10 USDT)";
+        const total = await con.lastUserId();
+        document.getElementById('totalUsers').innerText = total.toString();
+    } catch(e) { console.error("Ошибка загрузки данных контракта", e); }
+}
+
+async function handleAction() {
+    try {
+        const signer = provider.getSigner();
+        const usdt = new ethers.Contract(USDT_ADDR, ["function approve(address,uint256) public returns(bool)"], signer);
+        const amount = ethers.utils.parseUnits("10.0", 6);
+
+        document.getElementById('footerStatus').innerText = "1/2 ПОДТВЕРДИТЕ USDT...";
+        const appTx = await usdt.approve(CONTRACT, amount);
+        await appTx.wait();
+
+        document.getElementById('footerStatus').innerText = "2/2 РЕГИСТРАЦИЯ...";
+        const myCon = new ethers.Contract(CONTRACT, MY_ABI, signer);
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const ref = urlParams.get('ref') || OWNER;
+
+        const tx = await myCon.registration(ref); 
+        await tx.wait();
+
+        alert("УСПЕХ!");
+        location.reload();
+    } catch (e) {
+        console.error(e);
+        alert("Ошибка транзакции! Убедитесь, что у вас есть MATIC для газа и 10 USDT.");
+        document.getElementById('footerStatus').innerText = "";
+    }
+}
+
+function copyLink() {
+    const i = document.getElementById("refLink");
+    i.select();
+    navigator.clipboard.writeText(i.value);
+    alert("Ссылка скопирована!");
+}
