@@ -1,156 +1,92 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OCEAN INFINITY | dApp</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
-    <style>
-        body { background: radial-gradient(circle at top, #1e293b 0%, #0f172a 100%); min-height: 100vh; color: white; }
-        .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; }
-        .btn-primary { background: linear-gradient(90deg, #2563eb, #7c3aed); transition: all 0.3s; }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -10px #3b82f6; }
-    </style>
-</head>
-<body class="font-sans">
+// --- КОНФИГУРАЦИЯ ---
+const CONTRACT_ADDR = "ТВОЙ_АДРЕС_КОНТРАКТА"; 
+const USDT_ADDR = "0xc2132D05D31c914a87C6611C10748AEb04B58e8F"; 
 
-    <nav class="p-5 flex justify-between items-center max-w-6xl mx-auto">
-        <div class="text-2xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
-            OCEAN INFINITY
-        </div>
-        <div class="flex items-center gap-3">
-            <select id="lang" class="bg-gray-800 text-xs border-none rounded-lg px-2 py-1 outline-none">
-                <option value="ru">RU</option>
-                <option value="en">EN</option>
-            </select>
-            <button id="connectBtn" class="bg-blue-600 hover:bg-blue-500 text-sm px-5 py-2 rounded-full font-semibold">
-                Войти
-            </button>
-        </div>
-    </nav>
+const ABI = [
+    "function register(address _referrer) external",
+    "function buyLevel(uint8 _level) external",
+    "function users(address) view returns (uint256 id, address referrer, uint8 activeLevel, uint256 personalReferralsCount)",
+    "function owner() view returns (address)",
+    "function withdrawLeaderPool() external",
+    "function leaderPool() view returns (uint256)"
+];
 
-    <main class="max-w-4xl mx-auto px-6 py-10">
-        
-        <div class="glass-card p-8 mb-8 text-center">
-            <h2 id="t-welcome" class="text-gray-400 uppercase text-sm tracking-widest mb-2">Добро пожаловать в экосистему</h2>
-            <div id="userAddr" class="text-blue-400 font-mono text-sm mb-6">Кошелек не подключен</div>
-            
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="p-4 bg-white/5 rounded-xl">
-                    <p class="text-xs text-gray-500 mb-1">ID</p>
-                    <span id="u-id" class="text-xl font-bold">--</span>
-                </div>
-                <div class="p-4 bg-white/5 rounded-xl">
-                    <p class="text-xs text-gray-500 mb-1" id="t-level">Уровень</p>
-                    <span id="u-level" class="text-xl font-bold">--</span>
-                </div>
-                <div class="p-4 bg-white/5 rounded-xl">
-                    <p class="text-xs text-gray-500 mb-1" id="t-ref">Рефералы</p>
-                    <span id="u-refs" class="text-xl font-bold">0</span>
-                </div>
-                <div class="p-4 bg-white/5 rounded-xl border border-yellow-500/30">
-                    <p class="text-xs text-yellow-500 mb-1">USDT</p>
-                    <span id="u-usdt" class="text-xl font-bold text-yellow-500">0.0</span>
-                </div>
-            </div>
-        </div>
+const USDT_ABI = [
+    "function approve(address spender, uint256 amount) public returns (bool)",
+    "function balanceOf(address) view returns (uint256)",
+    "function allowance(address owner, address spender) view returns (uint256)"
+];
 
-        <div class="grid md:grid-cols-2 gap-6">
-            <div class="glass-card p-6">
-                <h3 class="text-lg font-bold mb-4" id="t-reg">Регистрация (Ур. 1)</h3>
-                <input id="refInput" type="text" placeholder="ID или Адрес спонсора" class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 mb-4 outline-none focus:border-blue-500">
-                <button onclick="handleAction('register')" class="w-full btn-primary py-4 rounded-xl font-bold uppercase tracking-wide">Активировать за 10 USDT</button>
-            </div>
+let provider, signer, contract, usdtContract;
 
-            <div class="glass-card p-6">
-                <h3 class="text-lg font-bold mb-4" id="t-upg">Повышение уровня</h3>
-                <p class="text-sm text-gray-400 mb-4 italic">Купите следующий уровень, чтобы не терять выплаты от глубины.</p>
-                <button onclick="handleAction('upgrade')" class="w-full border-2 border-blue-600 hover:bg-blue-600/10 py-4 rounded-xl font-bold uppercase tracking-wide transition">Купить След. Уровень</button>
-            </div>
-        </div>
+// ГЛАВНАЯ ФУНКЦИЯ КОННЕКТА
+async function connect() {
+    console.log("Попытка подключения...");
+    
+    if (typeof window.ethereum !== 'undefined') {
+        try {
+            // Прямой запрос разрешений у Метамаска
+            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+            console.log("Аккаунты получены:", accounts);
 
-        <div id="adminPanel" class="hidden mt-10 glass-card p-6 border-red-500/20">
-            <h3 class="text-red-400 font-bold mb-2">Панель Spartan (ID 1)</h3>
-            <button onclick="withdrawPool()" class="bg-red-600 px-6 py-2 rounded-lg text-sm">Вывести Лидерский Пул</button>
-        </div>
-    </main>
-
-    <script>
-        const CONTRACT_ADDR = "0x..."; // Вставь сюда адрес после деплоя
-        const USDT_ADDR = "0xc2132D05D31c914a87C6611C10748AEb04B58e8F"; // Polygon USDT
-        
-        const ABI = [
-            "function register(address _referrer) external",
-            "function buyLevel(uint8 _level) external",
-            "function users(address) view returns (uint256 id, address referrer, uint8 activeLevel, uint256 personalReferralsCount)",
-            "function owner() view returns (address)",
-            "function withdrawLeaderPool() external"
-        ];
-        
-        const USDT_ABI = [
-            "function approve(address spender, uint256 amount) public returns (bool)",
-            "function balanceOf(address) view returns (uint256)",
-            "function allowance(address owner, address spender) view returns (uint256)"
-        ];
-
-        let provider, signer, contract, usdtContract;
-
-        async function connect() {
-            if (!window.ethereum) return alert("Установите MetaMask!");
             provider = new ethers.BrowserProvider(window.ethereum);
             signer = await provider.getSigner();
-            const addr = await signer.getAddress();
+            const userAddress = await signer.getAddress();
             
-            document.getElementById('userAddr').innerText = addr;
-            document.getElementById('connectBtn').innerText = "Подключен";
-            
+            // Инициализация контрактов
             contract = new ethers.Contract(CONTRACT_ADDR, ABI, signer);
             usdtContract = new ethers.Contract(USDT_ADDR, USDT_ABI, signer);
-            
-            loadUserData(addr);
-        }
 
-        async function loadUserData(addr) {
-            const data = await contract.users(addr);
-            const bal = await usdtContract.balanceOf(addr);
-            const ownerAddr = await contract.owner();
+            // Визуальное обновление интерфейса
+            document.getElementById('connectBtn').innerText = "Подключен: " + userAddress.slice(0,6) + "...";
+            document.getElementById('userAddr').innerText = userAddress;
 
-            document.getElementById('u-id').innerText = data.id.toString();
-            document.getElementById('u-level').innerText = data.activeLevel.toString();
-            document.getElementById('u-refs').innerText = data.personalReferralsCount.toString();
-            document.getElementById('u-usdt').innerText = (Number(bal) / 1e6).toFixed(2);
+            // Загрузка данных
+            await loadUserData(userAddress);
 
-            if (addr.toLowerCase() === ownerAddr.toLowerCase()) {
-                document.getElementById('adminPanel').classList.remove('hidden');
+        } catch (error) {
+            console.error("Ошибка при подключении:", error);
+            if (error.code === 4001) {
+                alert("Вы отклонили запрос на подключение кошелька.");
+            } else {
+                alert("Ошибка: " + error.message);
             }
         }
+    } else {
+        alert("Метамаск не найден! Установите расширение или используйте крипто-браузер.");
+    }
+}
 
-        async function handleAction(type) {
-            try {
-                const amount = type === 'register' ? ethers.parseUnits("10", 6) : ethers.parseUnits("20", 6); // Упростил для примера
-                
-                // 1. Проверяем Approve
-                const allowance = await usdtContract.allowance(await signer.getAddress(), CONTRACT_ADDR);
-                if (allowance < amount) {
-                    const txApprove = await usdtContract.approve(CONTRACT_ADDR, ethers.MaxUint256);
-                    await txApprove.wait();
-                }
+async function loadUserData(addr) {
+    try {
+        const userData = await contract.users(addr);
+        const ownerAddr = await contract.owner();
+        const poolAmount = await contract.leaderPool();
 
-                // 2. Выполняем действие
-                if (type === 'register') {
-                    const ref = document.getElementById('refInput').value;
-                    await contract.register(ref);
-                } else {
-                    const currentLvl = parseInt(document.getElementById('u-level').innerText);
-                    await contract.buyLevel(currentLvl + 1);
-                }
-            } catch (e) {
-                alert("Ошибка: " + e.message);
-            }
+        // Если это ТЫ (Owner/ID 1)
+        if (addr.toLowerCase() === ownerAddr.toLowerCase()) {
+            document.getElementById('u-id').innerText = "1 (FOUNDER)";
+            document.getElementById('u-level').innerText = "15 (MAX)";
+            document.getElementById('adminPanel').classList.remove('hidden');
+            // Показываем сколько в пуле специально для тебя
+            console.log("В лидерском пуле сейчас:", ethers.formatUnits(poolAmount, 6), "USDT");
+        } else {
+            document.getElementById('u-id').innerText = userData.id.toString();
+            document.getElementById('u-level').innerText = userData.activeLevel.toString();
         }
 
-        document.getElementById('connectBtn').addEventListener('click', connect);
-    </script>
-</body>
-</html>
+        document.getElementById('u-refs').innerText = userData.personalReferralsCount.toString();
+        
+        const bal = await usdtContract.balanceOf(addr);
+        document.getElementById('u-usdt').innerText = ethers.formatUnits(bal, 6);
+
+    } catch (e) {
+        console.error("Ошибка загрузки данных профиля:", e);
+    }
+}
+
+// Принудительный вызов при клике
+document.getElementById('connectBtn').addEventListener('click', (e) => {
+    e.preventDefault();
+    connect();
+});
