@@ -1,92 +1,187 @@
-// --- КОНФИГУРАЦИЯ ---
-const CONTRACT_ADDR = "ТВОЙ_АДРЕС_КОНТРАКТА"; 
-const USDT_ADDR = "0xc2132D05D31c914a87C6611C10748AEb04B58e8F"; 
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCEAN INFINITY | Founder Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
+    <style>
+        :root { --accent: #3b82f6; --bg: #0f172a; }
+        body { background-color: var(--bg); color: white; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .btn-main { background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); transition: 0.3s; }
+        .btn-main:hover { opacity: 0.9; transform: scale(1.02); }
+    </style>
+</head>
+<body>
 
-const ABI = [
-    "function register(address _referrer) external",
-    "function buyLevel(uint8 _level) external",
-    "function users(address) view returns (uint256 id, address referrer, uint8 activeLevel, uint256 personalReferralsCount)",
-    "function owner() view returns (address)",
-    "function withdrawLeaderPool() external",
-    "function leaderPool() view returns (uint256)"
-];
+    <nav class="max-w-7xl mx-auto p-6 flex justify-between items-center">
+        <div class="text-2xl font-black italic tracking-tighter text-blue-500">OCEAN INFINITY</div>
+        <div class="flex gap-4">
+            <select id="lang" class="bg-slate-800 border-none rounded px-2 py-1 text-sm outline-none">
+                <option value="ru">RU</option>
+                <option value="en">EN</option>
+            </select>
+            <button id="connectBtn" class="btn-main px-6 py-2 rounded-full font-bold text-sm">Подключить MetaMask</button>
+        </div>
+    </nav>
 
-const USDT_ABI = [
-    "function approve(address spender, uint256 amount) public returns (bool)",
-    "function balanceOf(address) view returns (uint256)",
-    "function allowance(address owner, address spender) view returns (uint256)"
-];
+    <main class="max-w-4xl mx-auto px-6 py-10">
+        <div class="text-center mb-12">
+            <p id="quote" class="text-xl italic text-gray-400 font-light">"Будущее децентрализации начинается здесь."</p>
+        </div>
 
-let provider, signer, contract, usdtContract;
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div class="glass p-6 rounded-3xl text-center">
+                <p class="text-xs uppercase text-gray-500 mb-2">Ваш ID</p>
+                <h3 id="u-id" class="text-3xl font-bold">--</h3>
+            </div>
+            <div class="glass p-6 rounded-3xl text-center">
+                <p class="text-xs uppercase text-gray-500 mb-2">Активный Уровень</p>
+                <h3 id="u-level" class="text-3xl font-bold">--</h3>
+            </div>
+            <div class="glass p-6 rounded-3xl text-center">
+                <p class="text-xs uppercase text-gray-500 mb-2">Баланс USDT</p>
+                <h3 id="u-bal" class="text-3xl font-bold text-green-400">0.00</h3>
+            </div>
+        </div>
 
-// ГЛАВНАЯ ФУНКЦИЯ КОННЕКТА
-async function connect() {
-    console.log("Попытка подключения...");
-    
-    if (typeof window.ethereum !== 'undefined') {
-        try {
-            // Прямой запрос разрешений у Метамаска
-            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-            console.log("Аккаунты получены:", accounts);
+        <div class="grid md:grid-cols-2 gap-6">
+            <div class="glass p-8 rounded-3xl">
+                <h2 class="text-xl font-bold mb-4">Регистрация</h2>
+                <input id="refInput" type="text" placeholder="Адрес реферера (0x...)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 mb-4 outline-none focus:border-blue-500">
+                <button onclick="register()" class="w-full btn-main py-4 rounded-xl font-bold">АКТИВИРОВАТЬ L1 (10 USDT)</button>
+            </div>
 
-            provider = new ethers.BrowserProvider(window.ethereum);
-            signer = await provider.getSigner();
-            const userAddress = await signer.getAddress();
-            
-            // Инициализация контрактов
-            contract = new ethers.Contract(CONTRACT_ADDR, ABI, signer);
-            usdtContract = new ethers.Contract(USDT_ADDR, USDT_ABI, signer);
+            <div class="glass p-8 rounded-3xl flex flex-col justify-between">
+                <div>
+                    <h2 class="text-xl font-bold mb-4">Повышение</h2>
+                    <p class="text-gray-400 text-sm mb-6">Следующий уровень откроет вам больше бонусов из глубины (до 15 линий).</p>
+                </div>
+                <button onclick="buyLevel()" id="upgBtn" class="w-full border-2 border-blue-500 hover:bg-blue-500/10 py-4 rounded-xl font-bold">КУПИТЬ СЛЕД. УРОВЕНЬ</button>
+            </div>
+        </div>
 
-            // Визуальное обновление интерфейса
-            document.getElementById('connectBtn').innerText = "Подключен: " + userAddress.slice(0,6) + "...";
-            document.getElementById('userAddr').innerText = userAddress;
+        <div id="founderPanel" class="hidden mt-10 border border-yellow-500/30 p-8 rounded-3xl bg-yellow-500/5">
+            <h2 class="text-yellow-500 font-bold text-lg mb-4">⚙️ ПАНЕЛЬ ОСНОВАТЕЛЯ (SPARTAN)</h2>
+            <div class="flex flex-wrap gap-4">
+                <button onclick="withdrawPool()" class="bg-yellow-600 hover:bg-yellow-500 px-6 py-3 rounded-xl font-bold text-sm text-black">ЗАБРАТЬ ЛИДЕРСКИЙ ПУЛ</button>
+                <button onclick="rescueTokens()" class="border border-yellow-600 px-6 py-3 rounded-xl font-bold text-sm text-yellow-500">СПАСТИ ТОКЕНЫ (RESCUE)</button>
+            </div>
+            <p class="mt-4 text-xs text-gray-500 italic">*Эта панель видна только владельцу смарт-контракта.</p>
+        </div>
+    </main>
 
-            // Загрузка данных
-            await loadUserData(userAddress);
+    <script>
+        // ДАННЫЕ КОНТРАКТА (ЗАПОЛНИ ПОСЛЕ ДЕПЛОЯ)
+        const CONTRACT_ADDR = "ТВОЙ_АДРЕС_КОНТРАКТА"; 
+        const USDT_ADDR = "0xc2132D05D31c914a87C6611C10748AEb04B58e8F"; 
 
-        } catch (error) {
-            console.error("Ошибка при подключении:", error);
-            if (error.code === 4001) {
-                alert("Вы отклонили запрос на подключение кошелька.");
-            } else {
-                alert("Ошибка: " + error.message);
+        const ABI = [
+            "function register(address _referrer) external",
+            "function buyLevel(uint8 _level) external",
+            "function users(address) view returns (uint256 id, address referrer, uint8 activeLevel, uint256 personalReferralsCount)",
+            "function owner() view returns (address)",
+            "function withdrawLeaderPool() external",
+            "function rescueAnyToken(address _token) external",
+            "function levelPrices(uint8) view returns (uint256)"
+        ];
+
+        const USDT_ABI = [
+            "function approve(address spender, uint256 amount) public returns (bool)",
+            "function allowance(address owner, address spender) view returns (uint256)",
+            "function balanceOf(address) view returns (uint256)"
+        ];
+
+        let provider, signer, contract, usdt;
+
+        async function init() {
+            if (window.ethereum) {
+                provider = new ethers.BrowserProvider(window.ethereum);
+                document.getElementById('connectBtn').addEventListener('click', connect);
             }
         }
-    } else {
-        alert("Метамаск не найден! Установите расширение или используйте крипто-браузер.");
-    }
-}
 
-async function loadUserData(addr) {
-    try {
-        const userData = await contract.users(addr);
-        const ownerAddr = await contract.owner();
-        const poolAmount = await contract.leaderPool();
+        async function connect() {
+            try {
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                signer = await provider.getSigner();
+                const addr = await signer.getAddress();
+                
+                contract = new ethers.Contract(CONTRACT_ADDR, ABI, signer);
+                usdt = new ethers.Contract(USDT_ADDR, USDT_ABI, signer);
 
-        // Если это ТЫ (Owner/ID 1)
-        if (addr.toLowerCase() === ownerAddr.toLowerCase()) {
-            document.getElementById('u-id').innerText = "1 (FOUNDER)";
-            document.getElementById('u-level').innerText = "15 (MAX)";
-            document.getElementById('adminPanel').classList.remove('hidden');
-            // Показываем сколько в пуле специально для тебя
-            console.log("В лидерском пуле сейчас:", ethers.formatUnits(poolAmount, 6), "USDT");
-        } else {
-            document.getElementById('u-id').innerText = userData.id.toString();
-            document.getElementById('u-level').innerText = userData.activeLevel.toString();
+                document.getElementById('connectBtn').innerText = addr.slice(0,6) + "...";
+                loadData(addr);
+            } catch (e) { alert("Ошибка подключения: " + e.message); }
         }
 
-        document.getElementById('u-refs').innerText = userData.personalReferralsCount.toString();
-        
-        const bal = await usdtContract.balanceOf(addr);
-        document.getElementById('u-usdt').innerText = ethers.formatUnits(bal, 6);
+        async function loadData(addr) {
+            const user = await contract.users(addr);
+            const owner = await contract.owner();
+            const bal = await usdt.balanceOf(addr);
 
-    } catch (e) {
-        console.error("Ошибка загрузки данных профиля:", e);
-    }
-}
+            // Если ты - владелец (ID 1)
+            if(addr.toLowerCase() === owner.toLowerCase()) {
+                document.getElementById('u-id').innerText = "1 (FOUNDER)";
+                document.getElementById('u-level').innerText = "15 (MAX)";
+                document.getElementById('founderPanel').classList.remove('hidden');
+            } else {
+                document.getElementById('u-id').innerText = user.id == 0 ? "Не в сети" : user.id.toString();
+                document.getElementById('u-level').innerText = user.activeLevel.toString();
+            }
 
-// Принудительный вызов при клике
-document.getElementById('connectBtn').addEventListener('click', (e) => {
-    e.preventDefault();
-    connect();
-});
+            document.getElementById('u-bal').innerText = ethers.formatUnits(bal, 6);
+        }
+
+        async function register() {
+            const ref = document.getElementById('refInput').value.trim();
+            if(!ethers.isAddress(ref)) return alert("Введите верный адрес реферера");
+            
+            const price = ethers.parseUnits("10", 6);
+            await checkAndApprove(price);
+            
+            const tx = await contract.register(ref);
+            await tx.wait();
+            alert("Регистрация успешна!");
+            location.reload();
+        }
+
+        async function buyLevel() {
+            const addr = await signer.getAddress();
+            const user = await contract.users(addr);
+            const nextLvl = Number(user.activeLevel) + 1;
+            
+            if(nextLvl > 15) return alert("Максимальный уровень достигнут!");
+            
+            const price = await contract.levelPrices(nextLvl);
+            await checkAndApprove(price);
+            
+            const tx = await contract.buyLevel(nextLvl);
+            await tx.wait();
+            alert("Уровень повышен!");
+            location.reload();
+        }
+
+        async function checkAndApprove(amount) {
+            const addr = await signer.getAddress();
+            const allowance = await usdt.allowance(addr, CONTRACT_ADDR);
+            if(allowance < amount) {
+                alert("Нужно разрешение на использование USDT...");
+                const tx = await usdt.approve(CONTRACT_ADDR, ethers.MaxUint256);
+                await tx.wait();
+            }
+        }
+
+        // Админ функции
+        async function withdrawPool() {
+            const tx = await contract.withdrawLeaderPool();
+            await tx.wait();
+            alert("Средства выведены!");
+        }
+
+        init();
+    </script>
+</body>
+</html>
