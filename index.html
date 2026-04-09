@@ -2,89 +2,85 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OCEAN INFINITY | Official DApp</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OCEAN INFINITY | Mobile Ready</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
         :root { --blue: #3b82f6; --dark: #020617; }
-        body { background: var(--dark); color: #f8fafc; font-family: 'Inter', sans-serif; min-height: 100vh; }
+        body { background: var(--dark); color: #f8fafc; font-family: 'Inter', sans-serif; min-height: 100vh; overflow-x: hidden; }
         .font-crypto { font-family: 'Orbitron', sans-serif; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .btn-glow:hover { box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); transform: translateY(-1px); }
+        input, button { -webkit-appearance: none; border-radius: 0.75rem; }
+        .active-id { color: #60a5fa !important; text-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
     </style>
 </head>
 <body>
 
-    <nav class="max-w-6xl mx-auto p-6 flex justify-between items-center">
-        <div class="text-2xl font-crypto font-bold tracking-tighter text-blue-500">OCEAN INFINITY</div>
-        <div class="flex items-center gap-4">
-            <select id="langSelect" onchange="changeLang(this.value)" class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1 text-sm outline-none cursor-pointer text-white">
-                <option value="ru">🇷🇺 RU</option>
-                <option value="en">🇺🇸 EN</option>
+    <nav class="max-w-6xl mx-auto p-4 flex justify-between items-center">
+        <div class="text-xl font-crypto font-bold tracking-tighter text-blue-500">OCEAN INFINITY</div>
+        <div class="flex items-center gap-2">
+            <select id="langSelect" onchange="changeLang(this.value)" class="bg-slate-800 border-none rounded-lg px-2 py-1 text-xs outline-none text-white">
+                <option value="ru">RU</option>
+                <option value="en">EN</option>
             </select>
-            <button id="connectBtn" onclick="connect()" class="bg-blue-600 hover:bg-blue-500 px-6 py-2 rounded-full font-bold text-sm transition-all btn-glow text-white">Connect Wallet</button>
+            <button id="connectBtn" onclick="connect()" class="bg-blue-600 px-4 py-2 rounded-full font-bold text-[10px] uppercase transition-all text-white">Connect</button>
         </div>
     </nav>
 
-    <main class="max-w-5xl mx-auto px-6 py-8">
-        <div class="text-center mb-12">
-            <h1 id="t-hero" class="text-4xl md:text-6xl font-crypto font-bold mb-4 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent uppercase">Глобальная Экосистема</h1>
-            <p id="t-quote" class="text-slate-400 italic">"Ваш успех — это математическая неизбежность."</p>
+    <main class="max-w-5xl mx-auto px-4 py-4">
+        <div class="text-center mb-8">
+            <h1 id="t-hero" class="text-3xl font-crypto font-bold mb-2 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent uppercase">OCEAN AI</h1>
+            <p id="t-quote" class="text-slate-400 text-[10px] italic leading-relaxed">"Математическая неизбежность успеха"</p>
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 text-white">
-            <div class="glass p-5 rounded-2xl text-center">
-                <p id="t-id" class="text-[10px] text-slate-500 uppercase mb-1 font-crypto">ID</p>
-                <div id="u-id" class="text-xl font-crypto font-bold text-blue-400">--</div>
+        <div class="grid grid-cols-2 gap-3 mb-6">
+            <div class="glass p-4 rounded-2xl text-center">
+                <p id="t-id" class="text-[9px] text-slate-500 uppercase mb-1 font-crypto">ID</p>
+                <div id="u-id" class="text-sm font-crypto font-bold active-id">--</div>
             </div>
-            <div class="glass p-5 rounded-2xl text-center">
-                <p id="t-lvl" class="text-[10px] text-slate-500 uppercase mb-1 font-crypto">Уровень</p>
-                <div id="u-level" class="text-xl font-crypto font-bold text-blue-400">--</div>
+            <div class="glass p-4 rounded-2xl text-center">
+                <p id="t-lvl" class="text-[9px] text-slate-500 uppercase mb-1 font-crypto">Level</p>
+                <div id="u-level" class="text-sm font-crypto font-bold active-id">--</div>
             </div>
-            <div class="glass p-5 rounded-2xl text-center">
-                <p id="t-ref" class="text-[10px] text-slate-500 uppercase mb-1 font-crypto">Рефералы</p>
-                <div id="u-refs" class="text-xl font-crypto font-bold text-blue-400">0</div>
+            <div class="glass p-4 rounded-2xl text-center">
+                <p id="t-ref" class="text-[9px] text-slate-500 uppercase mb-1 font-crypto">Ref</p>
+                <div id="u-refs" class="text-sm font-crypto font-bold active-id">0</div>
             </div>
-            <div class="glass p-5 rounded-2xl text-center border-green-500/20">
-                <p class="text-[10px] text-green-500 uppercase mb-1 font-bold">USDT (Polygon)</p>
-                <div id="u-bal" class="text-xl font-crypto font-bold text-green-400">0.00</div>
-            </div>
-        </div>
-
-        <div id="refLinkBox" class="hidden mb-10 text-center">
-            <div class="inline-block glass p-3 px-6 rounded-2xl border border-blue-500/40">
-                <button onclick="copyRefLink()" class="flex items-center gap-3 text-blue-400 hover:text-white transition-all group">
-                    <span id="t-copy" class="text-xs font-bold uppercase tracking-widest">Копировать реферальную ссылку</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
-                    </svg>
-                </button>
+            <div class="glass p-4 rounded-2xl text-center border-green-500/20">
+                <p class="text-[9px] text-green-500 uppercase mb-1 font-bold">USDT</p>
+                <div id="u-bal" class="text-sm font-crypto font-bold text-green-400">0.00</div>
             </div>
         </div>
 
-        <div class="grid md:grid-cols-2 gap-8 text-white">
-            <div class="glass p-8 rounded-3xl border-white/5">
-                <h2 id="t-reg-title" class="text-2xl font-bold mb-6">Регистрация</h2>
-                <input id="refInput" type="text" placeholder="0x..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-4 mb-6 outline-none focus:border-blue-500 font-mono text-sm text-blue-300">
-                <button onclick="register()" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold text-lg transition-all shadow-lg uppercase tracking-widest">
+        <div id="refLinkBox" class="hidden mb-6">
+            <button onclick="copyRefLink()" class="w-full glass p-4 rounded-2xl border border-blue-500/40 flex justify-center items-center gap-3 text-blue-400">
+                <span id="t-copy" class="text-[10px] font-bold uppercase tracking-widest">Копировать ссылку</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" /></svg>
+            </button>
+        </div>
+
+        <div class="space-y-4">
+            <div class="glass p-6 rounded-3xl">
+                <h2 id="t-reg-title" class="text-lg font-bold mb-4">Регистрация</h2>
+                <input id="refInput" type="text" placeholder="Referrer 0x..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 mb-4 outline-none focus:border-blue-500 font-mono text-xs text-blue-300">
+                <button onclick="register()" class="w-full bg-blue-600 py-4 rounded-xl font-bold text-sm uppercase tracking-tighter">
                     <span id="t-reg-btn">Вступить (10 USDT)</span>
                 </button>
             </div>
 
-            <div class="glass p-8 rounded-3xl border-white/5">
-                <h2 id="t-upg-title" class="text-2xl font-bold mb-6 text-white">Повышение</h2>
-                <p id="t-upg-desc" class="text-slate-400 text-sm mb-10">Открывайте доход до 15 линий в глубину для максимальной прибыли.</p>
-                <button onclick="buyLevel()" class="w-full border-2 border-blue-600 hover:bg-blue-600/10 py-4 rounded-xl font-bold text-lg transition-all uppercase tracking-widest">
+            <div class="glass p-6 rounded-3xl">
+                <h2 id="t-upg-title" class="text-lg font-bold mb-2">Повышение</h2>
+                <p id="t-upg-desc" class="text-slate-400 text-[10px] mb-4">Открыть доход до 15 линий.</p>
+                <button onclick="buyLevel()" class="w-full border-2 border-blue-600 py-4 rounded-xl font-bold text-sm uppercase">
                     <span id="t-upg-btn">Купить Уровень</span>
                 </button>
             </div>
         </div>
 
-        <div id="founderPanel" class="hidden mt-12 glass border-yellow-500/40 p-8 rounded-3xl text-center bg-yellow-500/5">
-            <h3 class="text-yellow-500 font-crypto font-bold mb-4 italic tracking-widest text-sm">FOUNDER CONTROL PANEL</h3>
-            <button onclick="withdrawPool()" class="bg-yellow-600 hover:bg-yellow-500 text-black px-10 py-3 rounded-xl font-bold transition-all text-sm uppercase">Withdraw Leader Pool</button>
+        <div id="founderPanel" class="hidden mt-8 glass border-yellow-500/40 p-6 rounded-3xl text-center">
+            <button onclick="withdrawPool()" class="bg-yellow-600 text-black w-full py-3 rounded-xl font-bold text-xs uppercase">Withdraw Pool</button>
         </div>
     </main>
 
@@ -108,113 +104,101 @@
             "function balanceOf(address) view returns (uint256)"
         ];
 
-        const dict = {
-            ru: {
-                hero: "Глобальная Экосистема", quote: '"Ваш успех — это математическая неизбежность."',
-                id: "ID", lvl: "Уровень", ref: "Рефералы",
-                regTitle: "Регистрация", regBtn: "Вступить (10 USDT)", copy: "Копировать реферальную ссылку",
-                upgTitle: "Повышение", upgDesc: "Открывайте доход до 15 линий в глубину.", upgBtn: "Купить уровень"
-            },
-            en: {
-                hero: "Global Ecosystem", quote: '"Your success is a mathematical inevitability."',
-                id: "ID", lvl: "Level", ref: "Referrals",
-                regTitle: "Registration", regBtn: "Join (10 USDT)", copy: "Copy Referral Link",
-                upgTitle: "Upgrade", upgDesc: "Unlock profit levels up to 15 lines deep.", upgBtn: "Buy Level"
-            }
-        };
-
-        let provider, signer, contract, usdt;
+        let provider, signer, contract, usdt, userAddr;
 
         async function connect() {
-            if (!window.ethereum) return alert("Install MetaMask!");
-            provider = new ethers.BrowserProvider(window.ethereum);
-            await window.ethereum.request({ method: 'eth_requestAccounts' });
-            signer = await provider.getSigner();
-            const addr = await signer.getAddress();
-            
-            contract = new ethers.Contract(CONTRACT_ADDR, ABI, signer);
-            usdt = new ethers.Contract(USDT_ADDR, USDT_ABI, signer);
-            
-            document.getElementById('connectBtn').innerText = addr.slice(0,6) + "...";
-            loadData(addr);
+            if (!window.ethereum) return alert("Open in MetaMask Browser!");
+            try {
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                userAddr = accounts[0];
+                provider = new ethers.BrowserProvider(window.ethereum);
+                signer = await provider.getSigner();
+                
+                contract = new ethers.Contract(CONTRACT_ADDR, ABI, signer);
+                usdt = new ethers.Contract(USDT_ADDR, USDT_ABI, signer);
+                
+                document.getElementById('connectBtn').innerText = userAddr.slice(0,6) + "...";
+                await loadData(userAddr);
+            } catch (e) { alert("Error: " + e.message); }
         }
 
         async function loadData(addr) {
             try {
-                const user = await contract.users(addr);
-                const owner = await contract.owner();
-                const bal = await usdt.balanceOf(addr);
+                const [user, owner, bal] = await Promise.all([
+                    contract.users(addr),
+                    contract.owner(),
+                    usdt.balanceOf(addr)
+                ]);
 
-                // ЛОГИКА ШАМИЛЯ (ОСНОВАТЕЛЬ)
-                if (addr.toLowerCase() === MY_WALLET.toLowerCase() || addr.toLowerCase() === owner.toLowerCase()) {
-                    document.getElementById('u-id').innerText = "1 (SPARTAN)";
-                    document.getElementById('u-level').innerText = "15 (FOUNDER)";
-                    document.getElementById('founderPanel').classList.remove('hidden');
-                } else {
-                    document.getElementById('u-id').innerText = user.id == 0n ? "NOT REG" : user.id.toString();
-                    document.getElementById('u-level').innerText = user.activeLevel.toString();
-                }
+                const isFounder = addr.toLowerCase() === MY_WALLET.toLowerCase() || addr.toLowerCase() === owner.toLowerCase();
 
+                // Обновляем текст
+                document.getElementById('u-id').innerText = isFounder ? "1 (SPARTAN)" : (user.id == 0n ? "NOT REG" : user.id.toString());
+                document.getElementById('u-level').innerText = isFounder ? "15 (MAX)" : user.activeLevel.toString();
                 document.getElementById('u-refs').innerText = user.personalReferralsCount.toString();
                 document.getElementById('u-bal').innerText = Number(ethers.formatUnits(bal, 6)).toFixed(2);
-                
-                // Кнопка ссылки видна всем подключенным
-                document.getElementById('refLinkBox').classList.remove('hidden');
 
-                // Проверка реферера из URL
+                // Показываем скрытые элементы (Кнопка и панель)
+                document.getElementById('refLinkBox').classList.remove('hidden');
+                if (isFounder) document.getElementById('founderPanel').classList.remove('hidden');
+
+                // Авто-реферер
                 const urlParams = new URLSearchParams(window.location.search);
-                if(urlParams.has('ref')) {
-                    const refAddr = urlParams.get('ref');
-                    if(ethers.isAddress(refAddr)) document.getElementById('refInput').value = refAddr;
-                }
-            } catch (e) { console.error(e); }
+                if(urlParams.has('ref')) document.getElementById('refInput').value = urlParams.get('ref');
+
+            } catch (e) { console.error("Load error:", e); }
         }
 
         function copyRefLink() {
-            const link = window.location.origin + window.location.pathname + "?ref=" + signer.address;
-            navigator.clipboard.writeText(link);
-            alert("Ссылка скопирована!");
-        }
-
-        function changeLang(lang) {
-            Object.keys(dict[lang]).forEach(k => {
-                const el = document.getElementById('t-' + k);
-                if(el) el.innerText = dict[lang][k];
-            });
+            if (!userAddr) return alert("Connect Wallet!");
+            const link = window.location.origin + window.location.pathname + "?ref=" + userAddr;
+            
+            // Фикс для мобильного копирования
+            const el = document.createElement('textarea');
+            el.value = link;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            alert("Copied!");
         }
 
         async function register() {
             try {
                 const ref = document.getElementById('refInput').value.trim();
-                if(!ethers.isAddress(ref)) return alert("Неверный адрес спонсора!");
                 const amount = ethers.parseUnits("10", 6);
-                await checkApp(amount);
+                const allowance = await usdt.allowance(userAddr, CONTRACT_ADDR);
+                if (allowance < amount) {
+                    const tx = await usdt.approve(CONTRACT_ADDR, ethers.MaxUint256);
+                    await tx.wait();
+                }
                 const tx = await contract.register(ref);
-                await tx.wait(); location.reload();
-            } catch (e) { alert("Ошибка: " + (e.reason || e.message)); }
+                await tx.wait(); alert("Welcome!");
+                loadData(userAddr);
+            } catch (e) { alert(e.reason || "Check Balance/Approve"); }
         }
 
         async function buyLevel() {
             try {
-                const addr = await signer.getAddress();
-                const user = await contract.users(addr);
+                const user = await contract.users(userAddr);
                 const nxt = Number(user.activeLevel) + 1;
                 const prc = await contract.levelPrices(nxt);
-                await checkApp(prc);
+                const allowance = await usdt.allowance(userAddr, CONTRACT_ADDR);
+                if (allowance < prc) {
+                    const tx = await usdt.approve(CONTRACT_ADDR, ethers.MaxUint256);
+                    await tx.wait();
+                }
                 const tx = await contract.buyLevel(nxt);
-                await tx.wait(); location.reload();
-            } catch (e) { alert("Ошибка: " + (e.reason || e.message)); }
+                await tx.wait(); alert("Level Up!");
+                loadData(userAddr);
+            } catch (e) { alert(e.reason || "Error"); }
         }
 
-        async function checkApp(amt) {
-            const alw = await usdt.allowance(await signer.getAddress(), CONTRACT_ADDR);
-            if (alw < amt) {
-                const tx = await usdt.approve(CONTRACT_ADDR, ethers.MaxUint256);
-                await tx.wait();
-            }
+        function changeLang(l) { /* Упрощенная логика для теста */ 
+            const d = {ru: {id:"ID", lvl:"Уровень", cp:"Копировать"}, en: {id:"ID", lvl:"Level", cp:"Copy"}};
+            document.getElementById('t-id').innerText = d[l].id;
+            document.getElementById('t-copy').innerText = d[l].cp;
         }
-
-        async function withdrawPool() { await contract.withdrawLeaderPool(); }
     </script>
 </body>
 </html>
