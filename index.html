@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OCEAN INFINITY | Mobile Ready</title>
+    <title>OCEAN INFINITY | Spartan Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
@@ -12,75 +12,75 @@
         body { background: var(--dark); color: #f8fafc; font-family: 'Inter', sans-serif; min-height: 100vh; overflow-x: hidden; }
         .font-crypto { font-family: 'Orbitron', sans-serif; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        input, button { -webkit-appearance: none; border-radius: 0.75rem; }
         .active-id { color: #60a5fa !important; text-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
+        .gradient-text { background: linear-gradient(to right, #60a5fa, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .lvl-card { transition: all 0.3s ease; border: 1px solid rgba(255,255,255,0.05); }
+        .lvl-bought { border-color: #22c55e !important; background: rgba(34, 197, 94, 0.1); }
+        .lvl-next { border-color: #3b82f6 !important; background: rgba(59, 130, 246, 0.05); }
     </style>
 </head>
 <body>
 
     <nav class="max-w-6xl mx-auto p-4 flex justify-between items-center">
-        <div class="text-xl font-crypto font-bold tracking-tighter text-blue-500">OCEAN INFINITY</div>
+        <div class="text-xl font-crypto font-bold tracking-tighter text-blue-500 uppercase">Ocean Infinity</div>
         <div class="flex items-center gap-2">
-            <select id="langSelect" onchange="changeLang(this.value)" class="bg-slate-800 border-none rounded-lg px-2 py-1 text-xs outline-none text-white">
-                <option value="ru">RU</option>
-                <option value="en">EN</option>
+            <select id="langSelect" onchange="changeLang(this.value)" class="bg-slate-800 border-none rounded-lg px-2 py-1 text-xs outline-none text-white cursor-pointer">
+                <option value="ru">🇷🇺 RU</option>
+                <option value="en">🇺🇸 EN</option>
             </select>
-            <button id="connectBtn" onclick="connect()" class="bg-blue-600 px-4 py-2 rounded-full font-bold text-[10px] uppercase transition-all text-white">Connect</button>
+            <button id="connectBtn" onclick="connect()" class="bg-blue-600 px-4 py-2 rounded-full font-bold text-[10px] uppercase transition-all text-white">Connect Wallet</button>
         </div>
     </nav>
 
     <main class="max-w-5xl mx-auto px-4 py-4">
         <div class="text-center mb-8">
-            <h1 id="t-hero" class="text-3xl font-crypto font-bold mb-2 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent uppercase">OCEAN AI</h1>
-            <p id="t-quote" class="text-slate-400 text-[10px] italic leading-relaxed">"Математическая неизбежность успеха"</p>
+            <h1 id="t-hero" class="text-3xl md:text-5xl font-crypto font-bold mb-4 gradient-text uppercase tracking-widest">Глобальная Экосистема</h1>
+            <p id="t-quote" class="text-slate-300 text-[11px] md:text-sm italic leading-relaxed max-w-2xl mx-auto px-2">
+                "OCEAN INFINITY — это фундамент благополучия вашей семьи и уверенность в завтрашнем дне. Мы строим наследие, которое нужно каждому."
+            </p>
         </div>
 
-        <div class="grid grid-cols-2 gap-3 mb-6">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
             <div class="glass p-4 rounded-2xl text-center">
-                <p id="t-id" class="text-[9px] text-slate-500 uppercase mb-1 font-crypto">ID</p>
+                <p class="text-[9px] text-slate-500 uppercase mb-1 font-crypto text-blue-400">ВАШ ID</p>
                 <div id="u-id" class="text-sm font-crypto font-bold active-id">--</div>
             </div>
             <div class="glass p-4 rounded-2xl text-center">
-                <p id="t-lvl" class="text-[9px] text-slate-500 uppercase mb-1 font-crypto">Level</p>
+                <p class="text-[9px] text-slate-500 uppercase mb-1 font-crypto text-blue-400">УРОВЕНЬ</p>
                 <div id="u-level" class="text-sm font-crypto font-bold active-id">--</div>
             </div>
             <div class="glass p-4 rounded-2xl text-center">
-                <p id="t-ref" class="text-[9px] text-slate-500 uppercase mb-1 font-crypto">Ref</p>
+                <p class="text-[9px] text-slate-500 uppercase mb-1 font-crypto text-blue-400">РЕФЕРАЛЫ</p>
                 <div id="u-refs" class="text-sm font-crypto font-bold active-id">0</div>
             </div>
             <div class="glass p-4 rounded-2xl text-center border-green-500/20">
-                <p class="text-[9px] text-green-500 uppercase mb-1 font-bold">USDT</p>
+                <p class="text-[9px] text-green-500 uppercase mb-1 font-bold">USDT (POLYGON)</p>
                 <div id="u-bal" class="text-sm font-crypto font-bold text-green-400">0.00</div>
             </div>
         </div>
 
-        <div id="refLinkBox" class="hidden mb-6">
-            <button onclick="copyRefLink()" class="w-full glass p-4 rounded-2xl border border-blue-500/40 flex justify-center items-center gap-3 text-blue-400">
+        <div id="refLinkBox" class="hidden mb-8">
+            <button onclick="copyRefLink()" class="w-full glass p-4 rounded-2xl border border-blue-500/40 flex justify-center items-center gap-3 text-blue-400 bg-blue-500/5">
                 <span id="t-copy" class="text-[10px] font-bold uppercase tracking-widest">Копировать ссылку</span>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" /></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" /></svg>
             </button>
         </div>
 
-        <div class="space-y-4">
-            <div class="glass p-6 rounded-3xl">
-                <h2 id="t-reg-title" class="text-lg font-bold mb-4">Регистрация</h2>
-                <input id="refInput" type="text" placeholder="Referrer 0x..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 mb-4 outline-none focus:border-blue-500 font-mono text-xs text-blue-300">
-                <button onclick="register()" class="w-full bg-blue-600 py-4 rounded-xl font-bold text-sm uppercase tracking-tighter">
-                    <span id="t-reg-btn">Вступить (10 USDT)</span>
-                </button>
-            </div>
-
-            <div class="glass p-6 rounded-3xl">
-                <h2 id="t-upg-title" class="text-lg font-bold mb-2">Повышение</h2>
-                <p id="t-upg-desc" class="text-slate-400 text-[10px] mb-4">Открыть доход до 15 линий.</p>
-                <button onclick="buyLevel()" class="w-full border-2 border-blue-600 py-4 rounded-xl font-bold text-sm uppercase">
-                    <span id="t-upg-btn">Купить Уровень</span>
-                </button>
-            </div>
+        <div class="glass p-6 rounded-3xl border-white/5 mb-8 shadow-2xl">
+            <h2 id="t-reg-title" class="text-lg font-bold mb-4 flex items-center gap-2 text-white">Регистрация</h2>
+            <input id="refInput" type="text" placeholder="Адрес спонсора 0x..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 mb-4 outline-none focus:border-blue-500 font-mono text-xs text-blue-300">
+            <button onclick="register()" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold text-sm uppercase tracking-wider text-white transition-all shadow-lg shadow-blue-900/40">
+                <span id="t-reg-btn">Вступить (10 USDT)</span>
+            </button>
         </div>
 
-        <div id="founderPanel" class="hidden mt-8 glass border-yellow-500/40 p-6 rounded-3xl text-center">
-            <button onclick="withdrawPool()" class="bg-yellow-600 text-black w-full py-3 rounded-xl font-bold text-xs uppercase">Withdraw Pool</button>
+        <h3 class="text-xl font-crypto font-bold mb-6 text-center gradient-text uppercase tracking-widest">Маркетинг План</h3>
+        <div id="levelsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-12">
+            </div>
+
+        <div id="founderPanel" class="hidden glass border-yellow-500/40 p-6 rounded-3xl text-center bg-yellow-500/5 mb-10">
+            <p class="text-[9px] text-yellow-500 font-bold mb-3 tracking-widest uppercase">FOUNDER CONTROL PANEL</p>
+            <button onclick="withdrawPool()" class="bg-yellow-600 hover:bg-yellow-500 text-black w-full py-3 rounded-xl font-bold text-xs uppercase transition-all">Withdraw Pool</button>
         </div>
     </main>
 
@@ -89,13 +89,15 @@
         const MY_WALLET = "0x9f1053B119D1565e641d0694C3c16c6Bfe644DA7";
         const USDT_ADDR = "0xc2132D05D31c914a87C6611C10748AEb04B58e8F"; 
 
+        // ТВОИ ЦЕНЫ ИЗ СКРИНШОТА
+        const PRICES = [10, 20, 30, 45, 60, 80, 100, 140, 180, 240, 300, 380, 480, 600, 750];
+
         const ABI = [
             "function register(address _referrer) external",
             "function buyLevel(uint8 _level) external",
             "function users(address) view returns (uint256 id, address referrer, uint8 activeLevel, uint256 personalReferralsCount)",
             "function owner() view returns (address)",
-            "function withdrawLeaderPool() external",
-            "function levelPrices(uint8) view returns (uint256)"
+            "function withdrawLeaderPool() external"
         ];
 
         const USDT_ABI = [
@@ -106,20 +108,29 @@
 
         let provider, signer, contract, usdt, userAddr;
 
+        const dict = {
+            ru: {
+                hero: "Глобальная Экосистема", 
+                quote: '"OCEAN INFINITY — это фундамент благополучия вашей семьи и уверенность в завтрашнем дне. Мы строим наследие, которое нужно каждому."',
+                regTitle: "Регистрация", regBtn: "Вступить (10 USDT)", copy: "Копировать ссылку"
+            },
+            en: {
+                hero: "Global Ecosystem", 
+                quote: '"OCEAN INFINITY is the foundation of your family\'s well-being and confidence in the future. We are building a legacy that everyone needs."',
+                regTitle: "Registration", regBtn: "Join (10 USDT)", copy: "Copy Link"
+            }
+        };
+
         async function connect() {
-            if (!window.ethereum) return alert("Open in MetaMask Browser!");
-            try {
-                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                userAddr = accounts[0];
-                provider = new ethers.BrowserProvider(window.ethereum);
-                signer = await provider.getSigner();
-                
-                contract = new ethers.Contract(CONTRACT_ADDR, ABI, signer);
-                usdt = new ethers.Contract(USDT_ADDR, USDT_ABI, signer);
-                
-                document.getElementById('connectBtn').innerText = userAddr.slice(0,6) + "...";
-                await loadData(userAddr);
-            } catch (e) { alert("Error: " + e.message); }
+            if (!window.ethereum) return alert("MetaMask Required!");
+            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+            userAddr = accounts[0];
+            provider = new ethers.BrowserProvider(window.ethereum);
+            signer = await provider.getSigner();
+            contract = new ethers.Contract(CONTRACT_ADDR, ABI, signer);
+            usdt = new ethers.Contract(USDT_ADDR, USDT_ABI, signer);
+            document.getElementById('connectBtn').innerText = userAddr.slice(0,6) + "...";
+            loadData(userAddr);
         }
 
         async function loadData(addr) {
@@ -131,36 +142,78 @@
                 ]);
 
                 const isFounder = addr.toLowerCase() === MY_WALLET.toLowerCase() || addr.toLowerCase() === owner.toLowerCase();
+                const currentLvl = isFounder ? 15 : Number(user.activeLevel);
 
-                // Обновляем текст
                 document.getElementById('u-id').innerText = isFounder ? "1 (SPARTAN)" : (user.id == 0n ? "NOT REG" : user.id.toString());
-                document.getElementById('u-level').innerText = isFounder ? "15 (MAX)" : user.activeLevel.toString();
+                document.getElementById('u-level').innerText = isFounder ? "15 (FOUNDER)" : currentLvl.toString();
                 document.getElementById('u-refs').innerText = user.personalReferralsCount.toString();
                 document.getElementById('u-bal').innerText = Number(ethers.formatUnits(bal, 6)).toFixed(2);
-
-                // Показываем скрытые элементы (Кнопка и панель)
+                
                 document.getElementById('refLinkBox').classList.remove('hidden');
                 if (isFounder) document.getElementById('founderPanel').classList.remove('hidden');
 
-                // Авто-реферер
+                renderLevels(currentLvl);
+
                 const urlParams = new URLSearchParams(window.location.search);
                 if(urlParams.has('ref')) document.getElementById('refInput').value = urlParams.get('ref');
+            } catch (e) { console.error(e); }
+        }
 
-            } catch (e) { console.error("Load error:", e); }
+        function renderLevels(currentLvl) {
+            const grid = document.getElementById('levelsGrid');
+            grid.innerHTML = "";
+            PRICES.forEach((price, i) => {
+                const lvlNum = i + 1;
+                const isBought = currentLvl >= lvlNum;
+                const isNext = currentLvl + 1 === lvlNum;
+                
+                let statusHtml = isBought 
+                    ? `<div class="text-green-500 font-bold flex items-center justify-center gap-1">✅ КУПЛЕНО</div>`
+                    : isNext 
+                        ? `<button onclick="buyLevel(${lvlNum})" class="w-full bg-blue-600 hover:bg-blue-500 py-2 rounded-lg font-bold text-xs uppercase text-white transition-all">Купить за ${price}$</button>`
+                        : `<div class="text-slate-600 text-[10px] flex items-center justify-center gap-1 uppercase tracking-tighter">🔒 Доступно после ур. ${lvlNum-1}</div>`;
+
+                grid.innerHTML += `
+                    <div class="glass p-4 rounded-2xl lvl-card ${isBought ? 'lvl-bought' : (isNext ? 'lvl-next' : '')}">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-[10px] font-crypto text-slate-400 uppercase">Уровень ${lvlNum}</span>
+                            <span class="text-xs font-bold ${isBought ? 'text-green-400' : 'text-blue-400'}">${price} USDT</span>
+                        </div>
+                        ${statusHtml}
+                    </div>
+                `;
+            });
+        }
+
+        async function buyLevel(lvl) {
+            try {
+                const price = ethers.parseUnits(PRICES[lvl-1].toString(), 6);
+                const allowance = await usdt.allowance(userAddr, CONTRACT_ADDR);
+                if (allowance < price) {
+                    const tx = await usdt.approve(CONTRACT_ADDR, ethers.MaxUint256);
+                    await tx.wait();
+                }
+                const tx = await contract.buyLevel(lvl);
+                await tx.wait();
+                loadData(userAddr);
+            } catch (e) { alert("Ошибка: " + (e.reason || "Транзакция отменена")); }
         }
 
         function copyRefLink() {
-            if (!userAddr) return alert("Connect Wallet!");
             const link = window.location.origin + window.location.pathname + "?ref=" + userAddr;
-            
-            // Фикс для мобильного копирования
             const el = document.createElement('textarea');
-            el.value = link;
-            document.body.appendChild(el);
-            el.select();
-            document.execCommand('copy');
+            el.value = link; document.body.appendChild(el);
+            el.select(); document.execCommand('copy');
             document.body.removeChild(el);
-            alert("Copied!");
+            alert("Ссылка скопирована!");
+        }
+
+        function changeLang(l) {
+            document.getElementById('t-hero').innerText = dict[l].hero;
+            document.getElementById('t-quote').innerText = dict[l].quote;
+            document.getElementById('t-reg-title').innerText = dict[l].regTitle;
+            document.getElementById('t-reg-btn').innerText = dict[l].regBtn;
+            document.getElementById('t-copy').innerText = dict[l].copy;
         }
 
         async function register() {
@@ -173,31 +226,18 @@
                     await tx.wait();
                 }
                 const tx = await contract.register(ref);
-                await tx.wait(); alert("Welcome!");
+                await tx.wait();
                 loadData(userAddr);
-            } catch (e) { alert(e.reason || "Check Balance/Approve"); }
+            } catch (e) { alert("Ошибка регистрации"); }
         }
 
-        async function buyLevel() {
+        async function withdrawPool() {
             try {
-                const user = await contract.users(userAddr);
-                const nxt = Number(user.activeLevel) + 1;
-                const prc = await contract.levelPrices(nxt);
-                const allowance = await usdt.allowance(userAddr, CONTRACT_ADDR);
-                if (allowance < prc) {
-                    const tx = await usdt.approve(CONTRACT_ADDR, ethers.MaxUint256);
-                    await tx.wait();
-                }
-                const tx = await contract.buyLevel(nxt);
-                await tx.wait(); alert("Level Up!");
+                const tx = await contract.withdrawLeaderPool();
+                await tx.wait();
+                alert("Пул выведен!");
                 loadData(userAddr);
-            } catch (e) { alert(e.reason || "Error"); }
-        }
-
-        function changeLang(l) { /* Упрощенная логика для теста */ 
-            const d = {ru: {id:"ID", lvl:"Уровень", cp:"Копировать"}, en: {id:"ID", lvl:"Level", cp:"Copy"}};
-            document.getElementById('t-id').innerText = d[l].id;
-            document.getElementById('t-copy').innerText = d[l].cp;
+            } catch (e) { alert("Ошибка вывода"); }
         }
     </script>
 </body>
